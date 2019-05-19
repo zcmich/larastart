@@ -57,13 +57,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addNewLabel">Add new </h5>
+        <h5 class="modal-title" v-show="!editmode" id="addNewLabel">Add new </h5>
+        <h5 class="modal-title" v-show="editmode" id="addNewLabel">Update User's Info</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
         
-        <form @submit.prevent="createUser">
+        <form @submit.prevent="editmode ? updateUser() :createUser()">
       <div class="modal-body">
            <div class="form-group">
                <label>Name</label>
@@ -110,7 +111,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Create</button>
+        <button v-show="editmode" type="submit" class="btn btn-success">Update</button>
+         <button v-show="!editmode" type="submit" class="btn btn-primary">Create</button>
       </div>
 
        </form>
@@ -129,8 +131,10 @@
         data(){
            
            return{
+             editmode: false,
                users : {},
                form: new Form({
+                 id:'',
                 name : '',
                 email : '',
                 password : '',
@@ -144,12 +148,35 @@
 
 
        methods: {
+            updateUser(){
+              this.$Progress.start();
+            // console.log('Editing data');
+              this.form.put('api/user/'+this.form.id)
+                .then(() =>{   
+                    //success
+                    $('#addNew').modal('hide')
+                    Swal.fire(
+                            'Updated!',
+                            'Information  Updated.',
+                            'success'
+                                 )
+                              this.$Progress.finish();
+                              Fire.$emit('AfterCreate'); 
+                })
+                .catch(() =>{     
+                    this.$Progress.fail();
+                });
+
+            },
+
             editModal(user){
+                this.editmode = true;
                 this.form.reset();
               $('#addNew').modal('show')
               this.form.fill(user);
             } , 
                newModal(){
+                 this.editmode = false;
                 this.form.reset();
               $('#addNew').modal('show')
             } , 
@@ -194,11 +221,13 @@
                  Fire.$emit('AfterCreate'); 
               $('#addNew').modal('hide')
 
-              toast({
-                type: 'success',
-                title: 'User Created Successfully'
-                 })
-
+                  Swal.fire({
+      position: 'top-end',
+      type: 'success',
+      title: 'Your work has been saved',
+      showConfirmButton: false,
+      timer: 1500
+    })
 
              this.$Progress.finish();
              })
