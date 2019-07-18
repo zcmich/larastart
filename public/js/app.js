@@ -73973,7 +73973,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         getProfilePhoto: function getProfilePhoto() {
-            var photo = this.form.photo.length > 200 ? this.form.photo : "img/profile/" + this.form.photo;
+            var photo = this.form.photo.length > 200 ? this.form.photo : "\public\img\profile" + this.form.photo;
             return photo;
         },
         updateInfo: function updateInfo() {
